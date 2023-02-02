@@ -8,6 +8,7 @@ import be.technifutur.java.timairport.service.PlaneService;
 import be.technifutur.java.timairport.service.PlaneServiceImpl;
 import jakarta.persistence.PostUpdate;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,23 +39,24 @@ public class PlaneController {
         return planeService.getAll();
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/add")
     public void create(@RequestBody @Valid PlaneInsertForm form) {
         planeService.create(form);
     }
 
-    @PatchMapping("update/maintenance/{id:[0-9]+}")
+    @PatchMapping("update/{id:[0-9]+}/maintenance")
     public void updateMaintenance(@PathVariable long id, @RequestParam boolean maintenance) {
         planeService.updateMaintenance(id, maintenance);
         System.out.println("Cé okéééé");
     }
 
-    @PatchMapping("update/company/{id:[0-9]+}")
+    @PatchMapping("update/{id:[0-9]+}/company")
     public void updateCompany(@PathVariable long planeID, @RequestParam long companyID) {
         planeService.updateCompanyName(planeID, companyID);
     }
 
-    @PatchMapping("/update/{id:[0-9]+}")
+    @PatchMapping("/{id:[0-9]+}/update")
     public void update(@PathVariable long id, Map<String, String> params) {
         Map<String, Object> mapValues = new HashMap<>();
 
@@ -67,4 +69,8 @@ public class PlaneController {
         planeService.update(id, mapValues);
     }
 
+    @DeleteMapping("/{id:[0-9]+}/delete")
+    public void delete(@PathVariable long id) {
+        planeService.delete(id);
+    }
 }

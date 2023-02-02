@@ -41,7 +41,6 @@ public class PlaneServiceImpl implements PlaneService {
         plane.setType(typePlane);
 
         planeRepo.save(plane);
-
     }
 
     @Override
@@ -91,6 +90,11 @@ public class PlaneServiceImpl implements PlaneService {
 
         planeRepo.save(plane);
 
+    }
+
+    @Override
+    public void delete(long id) {
+        planeRepo.deleteById(id);
     }
 
 

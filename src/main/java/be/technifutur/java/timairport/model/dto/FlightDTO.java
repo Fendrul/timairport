@@ -6,10 +6,10 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Getter @Setter
+@Getter
+@Setter
 @Builder
 public class FlightDTO {
 
@@ -23,7 +23,7 @@ public class FlightDTO {
     private PilotDTO captain;
     private PilotDTO firstoOfficer;
     private PlaneDTO plane;
-    
+
     @Data
     @Builder
     public static class AirportDTO {
@@ -32,25 +32,26 @@ public class FlightDTO {
         private String country;
         private String city;
     }
-    
+
     @Data
     @Builder
     public static class PilotDTO {
         private long id;
-        private String name;
+        private String firstName;
+        private String lastName;
     }
-    
+
     @Data
     @Builder
-    public class PlaneDTO {
+    public static class PlaneDTO {
         private long id;
-        private String name;
+        private String callSign;
     }
-    
+
     public static FlightDTO from(Flight entity) {
         if (entity == null)
             return null;
-        
+
         return FlightDTO.builder()
                 .id(entity.getId())
                 .departureTime(entity.getDepartureTime())
@@ -73,8 +74,22 @@ public class FlightDTO {
                 )
                 .captain(
                         PilotDTO.builder()
-
+                                .id(entity.getCaptain().getId())
+                                .lastName(entity.getCaptain().getLastName())
+                                .firstName(entity.getCaptain().getFirstName())
                                 .build()
+                )
+                .firstoOfficer(
+                        PilotDTO.builder()
+                                .id(entity.getFirstOfficer().getId())
+                                .lastName(entity.getFirstOfficer().getLastName())
+                                .firstName(entity.getFirstOfficer().getFirstName())
+                                .build()
+                )
+                .plane(PlaneDTO.builder()
+                        .id(entity.getPlane().getId())
+                        .callSign(entity.getPlane().getCallSign())
+                        .build()
                 )
                 .build();
     }

@@ -1,18 +1,11 @@
 package be.technifutur.java.timairport.utils;
 
-import be.technifutur.java.timairport.model.entity.Airport;
-import be.technifutur.java.timairport.model.entity.Company;
-import be.technifutur.java.timairport.model.entity.Plane;
-import be.technifutur.java.timairport.model.entity.TypePlane;
-import be.technifutur.java.timairport.respository.AirportRepository;
-import be.technifutur.java.timairport.respository.CompanyRepository;
-import be.technifutur.java.timairport.respository.PlaneRepository;
-import be.technifutur.java.timairport.respository.TypePlaneRepository;
+import be.technifutur.java.timairport.model.entity.*;
+import be.technifutur.java.timairport.respository.*;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -23,13 +16,15 @@ public class DataInit implements InitializingBean {
     private final TypePlaneRepository typePlaneRepo;
     private final PlaneRepository planeRepository;
     private final AirportRepository airportRepo;
+    private final PilotRepository pilotRepo;
 
     public DataInit(CompanyRepository companyRepository, TypePlaneRepository typePlaneRepository,
-                    PlaneRepository planeRepository, AirportRepository airportRepository) {
+                    PlaneRepository planeRepository, AirportRepository airportRepository, PilotRepository pilotRepo) {
         this.companyRepository = companyRepository;
         this.typePlaneRepo = typePlaneRepository;
         this.planeRepository = planeRepository;
         this.airportRepo = airportRepository;
+        this.pilotRepo = pilotRepo;
     }
 
     @Override
@@ -100,12 +95,29 @@ public class DataInit implements InitializingBean {
         airport.setCity("Charleroi");
         airport.setPlaneParking(2);
         airport.setPlaneTypeAllowed(
-                List.of(
-                        typePlaneRepo.findById(2L).orElseThrow(RuntimeException::new)
-                )
+                List.of(typePlaneRepo.findById(1L).orElseThrow(RuntimeException::new))
         );
 
         airportRepo.save(airport);
 
+        Pilot pilot = new Pilot();
+
+        pilot.setFirstName("John");
+        pilot.setLastName("Doe");
+        pilot.setLicenseId("123456789");
+        pilot.setLicenseAcquisition(LocalDate.of(2022, 01, 25));
+        pilot.setCompany(companyRepository.findById(1L).orElseThrow(RuntimeException::new));
+
+        pilotRepo.save(pilot);
+
+        pilot = new Pilot();
+
+        pilot.setFirstName("Jane");
+        pilot.setLastName("Ricky");
+        pilot.setLicenseId("987654321");
+        pilot.setLicenseAcquisition(LocalDate.of(2022, 01, 25));
+        pilot.setCompany(companyRepository.findById(2L).orElseThrow(RuntimeException::new));
+
+        pilotRepo.save(pilot);
     }
 }

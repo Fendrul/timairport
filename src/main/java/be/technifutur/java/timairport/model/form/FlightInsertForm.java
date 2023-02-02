@@ -11,9 +11,6 @@ import java.time.LocalDateTime;
 public class FlightInsertForm {
 
     @NotNull
-    public long planeId;
-
-    @NotNull
     @Future
     public LocalDateTime departureTime;
 
@@ -33,7 +30,8 @@ public class FlightInsertForm {
     @NotNull
     public long firstOfficer;
 
-    public boolean cancelled = false;
+    @NotNull
+    public long companyID;
 
     public Flight toEntity() {
 
