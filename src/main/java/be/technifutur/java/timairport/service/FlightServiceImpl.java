@@ -1,6 +1,9 @@
 package be.technifutur.java.timairport.service;
 
+import be.technifutur.java.timairport.exception.RessourceNotFoundException;
 import be.technifutur.java.timairport.exception.ValidationException;
+import be.technifutur.java.timairport.model.dto.FlightDTO;
+import be.technifutur.java.timairport.model.dto.PlaneDTO;
 import be.technifutur.java.timairport.model.entity.*;
 import be.technifutur.java.timairport.model.form.FlightInsertForm;
 import be.technifutur.java.timairport.respository.*;
@@ -11,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class FlightServiceImpl implements FlightService {
@@ -42,16 +46,16 @@ public class FlightServiceImpl implements FlightService {
             throw new ValidationException("The arrival date have to be after the departure date");
 
         Pilot captain = pilotRepo.findById(form.getCaptainId())
-                .orElseThrow(RuntimeException::new);
+                .orElseThrow(RessourceNotFoundException::new);
         Pilot firstOfficer = pilotRepo.findById(form.getFirstOfficer())
-                .orElseThrow(RuntimeException::new);
+                .orElseThrow(RessourceNotFoundException::new);
         if (captain == firstOfficer)
             throw new ValidationException("Captain and first officer must have a different ID");
 
         Airport airportDeparture = airportRepo.findById(form.getAirportDepartureId())
-                .orElseThrow(RuntimeException::new);
+                .orElseThrow(RessourceNotFoundException::new);
         Airport airportDestination = airportRepo.findById(form.getAirportArrivalId())
-                .orElseThrow(RuntimeException::new);
+                .orElseThrow(RessourceNotFoundException::new);
 
         if (airportDeparture == airportDestination)
             throw new ValidationException("Airport arrival must be different from the airport departure");
@@ -72,7 +76,7 @@ public class FlightServiceImpl implements FlightService {
             querry.setParameter(2, airportDestination.getId());
 
             Company company = companyRepo.findById(form.getCompanyID())
-                    .orElseThrow(RuntimeException::new);
+                    .orElseThrow(RessourceNotFoundException::new);
 
             planes = querry.getResultList().stream()
                     .filter(p -> p.getCompany().getId() == company.getId()
@@ -103,7 +107,7 @@ public class FlightServiceImpl implements FlightService {
             if (!lastFlight.isEmpty() && lastFlight.get(0).getDestination().equals(airportDeparture)) {
                 planesInAirport.add(
                         planeRepo.findById(lastFlight.get(0).getPlane().getId())
-                                .orElseThrow(RuntimeException::new)
+                                .orElseThrow(RessourceNotFoundException::new)
                 );
             }
         }
@@ -119,5 +123,44 @@ public class FlightServiceImpl implements FlightService {
         flight.setDestination(airportDestination);
 
         flightRepo.save(flight);
+    }
+
+    @Override
+    public void update(long id, FlightInsertForm form) {
+        Flight flight = flightRepo.findById(id)
+                .orElseThrow(RuntimeException::new);
+
+        flight.setDepartureTime(form.getDepartureTime());
+        flight.setArrivalTime(form.getArrivalTime());
+        flight.setDeparture(airportRepo.findById(form.getAirportDepartureId())
+                .orElseThrow(RuntimeException::new));
+        flight.setDestination(airportRepo.findById(form.getAirportArrivalId())
+                .orElseThrow(RuntimeException::new));
+        flight.setCaptain(pilotRepo.findById(form.getCaptainId())
+                .orElseThrow(RuntimeException::new));
+        flight.setFirstOfficer(pilotRepo.findById(form.getFirstOfficer())
+                .orElseThrow(RuntimeException::new));
+        flight.setCancelled(form.isCancelled());
+
+    }
+
+    @Override
+    public void softDelete(long id) {
+        flightRepo.setCancelled(id);
+    }
+
+    @Override
+    public List<FlightDTO> getAll() {
+        return flightRepo.findAll().stream()
+                .map(FlightDTO::from)
+                .toList();
+    }
+
+    @Override
+    public List<FlightDTO> read() {
+        return flightRepo.findAll().stream()
+                .filter(f -> !f.isCancelled())
+                .map(FlightDTO::from)
+                .toList();
     }
 }

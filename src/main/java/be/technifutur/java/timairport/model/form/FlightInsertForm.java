@@ -33,6 +33,8 @@ public class FlightInsertForm {
     @NotNull
     public long companyID;
 
+    public boolean cancelled;
+
     public Flight toEntity() {
 
         Flight flight = new Flight();

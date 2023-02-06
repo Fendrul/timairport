@@ -25,13 +25,13 @@ import java.util.List;
 public class SecurityConfig {
 
     /**
-     * RequestMatchers (are evaluated in order, so the most specific matchers should be first)
-     *
+     * <h2>RequestMatchers</h2>
+     * (are evaluated in order, so the most specific matchers should be first)
      *    Method
      *    - a value of HttpMethod
      *
      *
-     *    Pattern
+     *    Pattern: 1 ou plsr  chaine de caractères représentant des URI
      *    - ?  : matches a single character
      *    - *  : matches zero or more characters
      *    - ** : matches zero or more directories in a path
@@ -62,9 +62,9 @@ public class SecurityConfig {
         http.authorizeHttpRequests((authorize) -> {
             authorize
                     //Via RequestMatchers
-                    .requestMatchers(request -> request.getMethod().equals(HttpMethod.GET)).hasRole("Admin")
+                    .requestMatchers(request -> request.getMethod().equals(HttpMethod.GET)).hasRole("ADMIN")
                     // Via HttpMethod
-                    .requestMatchers(HttpMethod.POST).hasRole("Admin")
+                    .requestMatchers(HttpMethod.POST).hasRole("ADMIN")
                     //Via Mapping d'URI
                     .requestMatchers("plane/all").anonymous()
                     .requestMatchers("/plane/add").authenticated()
@@ -72,6 +72,13 @@ public class SecurityConfig {
                     .requestMatchers("/plane/*/update").hasRole("ADMIN")//.hasAuthority("ROLE_ADMIN")
                     //Via HttpMethod + maping d'URI
                     .requestMatchers(HttpMethod.DELETE, "/plane/*").hasAnyRole("ADMIN", "USER")//.hasAnyAuthority("ROLE_ADMIN", "ROLE_USER")
+                    .requestMatchers((request) -> request.getMethod().equals(HttpMethod.GET) ||
+                            request.getMethod().equals(HttpMethod.POST) ||
+                            request.getMethod().equals(HttpMethod.DELETE) ||
+                            request.getMethod().equals(HttpMethod.PATCH) &&
+                            request.getRequestURI().equals("/flight/**")).hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.GET, "/flight/**").hasRole("ADMIN")
+                    .requestMatchers("/flight/**").authenticated()
                     .anyRequest().permitAll();
         });
 
